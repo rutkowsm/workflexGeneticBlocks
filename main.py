@@ -1,71 +1,25 @@
 import random
 from deap import base, creator, tools, algorithms
 from datetime import datetime
+import data as d
 
 tstart = datetime.now()
 print(f"Start:{tstart}")
-
-BLOCK_SIZES = {
-    'yellow': range(4, 9),
-    'green': range(2, 9),
-    'blue': range(4, 8),
-    'red': range(3, 10),
-    'grey': range(5, 10)
-}
-
-BOARDS = {
-    'Board 1': {
-        'slots': {
-            'A': (8, 18),
-            'B': (10, 16)
-        },
-        'restrictions': {
-            'blue': [8, 9, 10],
-            'red': [10, 11, 12]
-        }
-    },
-    'Board 2': {
-        'slots': {
-            'A': (10, 18),
-            'B': (10, 18)
-        },
-        'restrictions': {
-            'green': [14, 15],
-            'red': [12, 13, 14],
-            'yellow': [8, 9, 10, 11]
-        }
-    },
-    'Board 3': {
-        'slots': {
-            'A': (10, 18),
-            'B': (10, 18),
-            'C': (12, 17)
-        },
-        'restrictions': {
-            'grey': [12, 13],
-            'red': [17, 18, 19],
-            'yellow': [14, 15, 16]
-        }
-    },
-}
-
-NUM_BOARDS = len(BOARDS)
-MAX_SLOTS = 5
 
 
 def generate_individual():
     individual = []
 
-    available_colors_by_board = {board_key: set(BLOCK_SIZES.keys()) for board_key in BOARDS.keys()}
+    available_colors_by_board = {board_key: set(d.BLOCK_SIZES.keys()) for board_key in d.BOARDS.keys()}
 
-    for board_key, board_info in BOARDS.items():
+    for board_key, board_info in d.BOARDS.items():
         board_colors = available_colors_by_board[board_key]
         for slot_key, slot_range in board_info['slots'].items():
             if not board_colors:
                 return generate_individual()
 
             color = random.choice(list(board_colors))
-            size = random.randint(BLOCK_SIZES[color].start, BLOCK_SIZES[color].stop - 1)
+            size = random.randint(d.BLOCK_SIZES[color].start, d.BLOCK_SIZES[color].stop - 1)
 
             individual.append((color, size))
             board_colors.remove(color)
@@ -73,12 +27,11 @@ def generate_individual():
     return individual
 
 
-
 def evaluate(individual):
     total_score = 0
     index = 0
 
-    for board_key, board_info in BOARDS.items():
+    for board_key, board_info in d.BOARDS.items():
         used_colors = set()
         empty_slots = 0  # Licznik pustych slotów na planszy
         for slot_key, slot_range in board_info['slots'].items():
@@ -89,7 +42,8 @@ def evaluate(individual):
 
                 # Kara za naruszenie ograniczeń kolorów
                 if block_color in board_info['restrictions'] and any(
-                    pos in board_info['restrictions'][block_color] for pos in range(slot_range[0], slot_range[1] + 1)):
+                        pos in board_info['restrictions'][block_color] for pos in
+                        range(slot_range[0], slot_range[1] + 1)):
                     total_score -= 10000
 
                 # Kara za powtórzenie koloru na planszy
@@ -110,8 +64,6 @@ def evaluate(individual):
     return total_score,
 
 
-
-
 # Parametry algorytmu
 NGEN = 5000
 CX_PROB = 0.8
@@ -122,7 +74,7 @@ creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 toolbox.register("attr_block", lambda: random.choice(
-    [(color, size) for color in BLOCK_SIZES for size in BLOCK_SIZES[color]]))
+    [(color, size) for color in d.BLOCK_SIZES for size in d.BLOCK_SIZES[color]]))
 
 toolbox.register("individual", tools.initIterate, creator.Individual, generate_individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -135,7 +87,7 @@ toolbox.register("select", tools.selTournament, tournsize=3)
 
 def print_boards(solution):
     index = 0
-    for board_key, board_info in BOARDS.items():
+    for board_key, board_info in d.BOARDS.items():
         print(f"{board_key}:")
         for slot_key, slot_range in board_info['slots'].items():
             print(f"\tSlot {slot_key}:")
