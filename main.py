@@ -6,6 +6,12 @@ import data as d
 tstart = datetime.now()
 print(f"Start:{tstart}")
 
+# Parametry algorytmu
+TOTAL_POPULATION = 300
+NGEN = 500
+CX_PROB = 0.9
+MUT_PROB = 0.1
+
 
 def generate_individual():
     individual = []
@@ -44,11 +50,11 @@ def evaluate(individual):
                 if block_color in board_info['restrictions'] and any(
                         pos in board_info['restrictions'][block_color] for pos in
                         range(slot_range[0], slot_range[1] + 1)):
-                    total_score -= 10000
+                    total_score -= 100000
 
                 # Kara za powtórzenie koloru na planszy
                 if block_color in used_colors:
-                    total_score -= 10000
+                    total_score -= 10000000
                 else:
                     used_colors.add(block_color)
             else:
@@ -64,10 +70,24 @@ def evaluate(individual):
     return total_score,
 
 
-# Parametry algorytmu
-NGEN = 5000
-CX_PROB = 0.8
-MUT_PROB = 0.3
+def mutate_individual(individual):
+    mutation_idx = random.randrange(len(individual))
+    mutation_choice = random.choice(["color", "size", "both"])
+
+    if mutation_choice == "color":
+        new_color = random.choice(list(d.BLOCK_SIZES.keys()))
+        individual[mutation_idx] = (new_color, individual[mutation_idx][1])
+    elif mutation_choice == "size":
+        color = individual[mutation_idx][0]
+        new_size = random.randint(d.BLOCK_SIZES[color].start, d.BLOCK_SIZES[color].stop - 1)
+        individual[mutation_idx] = (color, new_size)
+    elif mutation_choice == "both":
+        new_color = random.choice(list(d.BLOCK_SIZES.keys()))
+        new_size = random.randint(d.BLOCK_SIZES[new_color].start, d.BLOCK_SIZES[new_color].stop - 1)
+        individual[mutation_idx] = (new_color, new_size)
+
+    return individual,
+
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -81,7 +101,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 toolbox.register("evaluate", evaluate)
 toolbox.register("mate", tools.cxTwoPoint)
-toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
+toolbox.register("mutate", mutate_individual)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
 
@@ -104,13 +124,12 @@ def print_boards(solution):
 
 def main():
     random.seed(64)
-    population = toolbox.population(n=300)
+    population = toolbox.population(n=TOTAL_POPULATION)
 
-    NGEN = 50
     best_solutions = []
 
     for gen in range(NGEN):
-        offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.2)
+        offspring = algorithms.varAnd(population, toolbox, cxpb=CX_PROB, mutpb=MUT_PROB)
         fits = toolbox.map(toolbox.evaluate, offspring)
         for fit, ind in zip(fits, offspring):
             ind.fitness.values = fit

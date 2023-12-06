@@ -9,8 +9,8 @@ BLOCK_SIZES = {
 BOARDS = {
     'Board 1': {
         'slots': {
-            'A': (8, 18),
-            'B': (10, 16)
+            'A': (8, 17),
+            'B': (10, 15)
         },
         'restrictions': {
             'blue': [8, 9, 10],
@@ -19,8 +19,8 @@ BOARDS = {
     },
     'Board 2': {
         'slots': {
-            'A': (10, 18),
-            'B': (10, 18)
+            'A': (10, 17),
+            'B': (10, 17)
         },
         'restrictions': {
             'green': [14, 15],
@@ -30,8 +30,8 @@ BOARDS = {
     },
     'Board 3': {
         'slots': {
-            'A': (10, 18),
-            'B': (10, 18),
+            'A': (10, 17),
+            'B': (10, 17),
             'C': (12, 17)
         },
         'restrictions': {
