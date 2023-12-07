@@ -7,10 +7,11 @@ tstart = datetime.now()
 print(f"Start:{tstart}")
 
 # Parametry algorytmu
-TOTAL_POPULATION = 300
+TOTAL_POPULATION = 5000
 NGEN = 500
-CX_PROB = 0.9
-MUT_PROB = 0.1
+CX_PROB = 0.5
+MUT_PROB = 0.01
+TOURNSIZE = 8
 
 
 def generate_individual():
@@ -58,7 +59,7 @@ def evaluate(individual):
                 else:
                     used_colors.add(block_color)
             else:
-                total_score -= 1000  # Kara za niezapełnienie slotu
+                total_score -= 10000000  # Kara za niezapełnienie slotu
                 empty_slots += 1
 
             index += 1
@@ -102,7 +103,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evaluate)
 toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", mutate_individual)
-toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("select", tools.selTournament, tournsize=TOURNSIZE)
 
 
 def print_boards(solution):
